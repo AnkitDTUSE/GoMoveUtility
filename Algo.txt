@@ -1,0 +1,39 @@
+Utility starts from 
+
+-> main
+    1. accepts Args
+    2. retrive Source, Dest
+    3. check validity of Source, Dest by os.stats
+    4. initialize a fileSize variable to store totalFileSize of the data transfer
+    5. record time
+    6. call MoveUti(Source,Dest,&fileSize)
+
+-> MoveUtil func File
+    1. make a global MUTEX lock for fileSize
+    2. Jump in MoveUtil func
+    3. retirve the basePath of Soucre 
+    4. retirve SourceStat from os.Stat()
+    5. Check if Source is a Dir or a file using sourceStat.IsDir()
+        IF -> source is a file
+           5.1 lock the fileSize incerment with mutexLock and unlock it afterwards
+           5.2 add basePath to Dest to initialize the fileName of moveing file
+           5.3 Open SourceFile and make a file handler
+           5.4 check for err free file opening 
+           5.5 Create a file at Dest and check for err free file creation
+           5.6 create a Buffer (im making a 2MB buffer)
+           5.7 Use io.CopyBuffer(dest,source,buffer) to write data in Dest in chunks of 2MB from source 
+           5.8 close both Source and Dest file
+           5.9 return
+        Else -> source is a Dir
+           5.1 read the Structure of Source using ReadDir()
+           5.2 add base address of sourceDir in Dest
+           5.3 create a dir at Dest (the dir basePath which we added in prev step)
+           5.4 intialize a waitGroup for Go routines
+           5.5 loop over the sourceStructure
+           5.6 now Call MoveUtil func for every entry recursively with the base case that source is now a file, in sourceStructure // using Go routines here for concurrent execution of copy files
+           5.7 reapeat step 5 until we reach to the depth of the Structure
+
+-> main
+    7. record exiting time from MoveUtil
+    8. Print details
+    9. delete the source using os.Remove()

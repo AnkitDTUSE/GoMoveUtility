@@ -1,0 +1,47 @@
+
+Go Routines are lightweighted threads (aka LWT -> for the purpose of writing in this note) managed by Go runtime
+these LWTs are much smaller in size than the regular threads of OS (~2KB LWT  ~1MB to 10MB Os-Thread)
+
+which Allure us that we can make a Number of these routines in our program, which is OK when each of them occupy a little amount of resource (CPU etc)
+
+but when each of routine requires a considerable amount of resources then it is good to Prune the number of routines 
+
+lets say we need to copy 10,000 files (regardless of size) and we are creating a Go routine of each file seperately with 2MB of buffer size for read Write purposes
+
+now at the end this Buffer also got allocated in RAM, i.e 10,000 * 2 ~= 20GB RAM !!!!!
+But in practice, several things can happen before you reach that point:
+
+    1. run out of memory
+        The OS might start:
+            swapping/paging heavily
+            slowing down dramatically
+            killing the process 
+            returning allocation failures
+
+    3. Storage becomes the bottleneck
+
+Your SSD/HDD can only handle so much throughput.
+
+we used a BUFFER approach to solve the shortage of memory issue and Routines to add concurrency
+
+IF Buffer size is making a problem then why we dont just remove the buffer and copy paste whole file at once
+this will create a chaos as for ex we have 100 files of 500MB each now 100*500 = 50GB of data concurrently want to get stored in RAM , near death situation 
+
+thats why we need to limit the number of Go routines so that the total amount of resources being used can be reduced
+
+--> HOW TO GET THROUGH THIS ISSUE
+    1. Can use worker Pool:-
+        A worker pool limits the number of concurrent tasks by using a fixed number of workers to process jobs from a queue 
+        This prevents excessive Goroutines, reduces memory and CPU usage, and ensures efficient resource management.
+
+        Why Use Worker Pools?
+        Without a worker pool, a large number of Goroutines might be created to handle concurrent tasks,
+        but this can lead to performance degradation and resource exhaustion. 
+        The worker pool pattern solves this by using a fixed set of workers and queuing additional tasks until a worker is free.
+
+        How Does the Worker Pool Work in Golang?
+        The worker pool mechanism in Golang typically involves three key components:
+
+        Task Queue: A channel used to hold tasks that need to be processed.
+        Worker Pool: A set of Goroutines that process the tasks from the task queue.
+        Manager Goroutine: A controlling entity that manages the lifecycle of workers and assigns tasks to them.
